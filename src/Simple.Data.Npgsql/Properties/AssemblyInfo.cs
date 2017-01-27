@@ -5,3 +5,4 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("PostgreSql adapter for Simple.Data")]
 
 [assembly: InternalsVisibleTo("Simple.Data.Npgsql.Test")]
+

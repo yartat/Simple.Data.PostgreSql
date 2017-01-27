@@ -9,12 +9,20 @@ using NUnit.Framework;
 
 namespace Simple.Data.Npgsql.Test
 {
-  public class InsertTest
+  [TestFixture]
+  public class InsertTests
   {
     [SetUp]
     public void SetUp()
     {
+      GlobalTest.SetUp();
       GlobalTest.Database.Seed();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+      GlobalTest.TearDown();
     }
 
     #region MA - added support for inserting enums

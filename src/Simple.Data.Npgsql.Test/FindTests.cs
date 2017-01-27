@@ -2,19 +2,28 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Net;
+using System.Net.NetworkInformation;
 using NpgsqlTypes;
 
 using NUnit.Framework;
 
 namespace Simple.Data.Npgsql.Test
 {
-  public class FindTest
+  [TestFixture]
+  public class FindTests
   {
     [SetUp]
     public void SetUp()
     {
+      GlobalTest.SetUp();
       GlobalTest.Database.Seed();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+      GlobalTest.TearDown();
     }
 
     [Test]
@@ -91,7 +100,7 @@ namespace Simple.Data.Npgsql.Test
       var db = Database.Open();
       Future<int> totalCount;
       var count = db.Users.All().WithTotalCount(out totalCount).Skip(1).Take(2).ToList().Count;
-      Assert.AreEqual(3, totalCount);
+      Assert.AreEqual(3, totalCount.Value);
       Assert.AreEqual(2, count);
     }
 
@@ -101,7 +110,7 @@ namespace Simple.Data.Npgsql.Test
       var db = Database.Open();
       Future<int> totalCount;
       List<User> users = db.Users.All().Where(db.Users.Name.Like("%e")).WithTotalCount(out totalCount).Skip(1).ToList<User>();
-      Assert.AreEqual(2, totalCount);
+      Assert.AreEqual(2, totalCount.Value);
       Assert.AreEqual(1, users.Count);
       Assert.AreEqual("Dave", users[0].Name);
     }
@@ -203,10 +212,10 @@ namespace Simple.Data.Npgsql.Test
       Assert.IsAssignableFrom<DateTime>(result.TimestamptzField);
       Assert.IsAssignableFrom<DateTime>(result.TimestampWithTimeZoneField);
       Assert.IsAssignableFrom<DateTime>(result.DateField);
-      Assert.IsAssignableFrom<DateTime>(result.TimeField);
-      Assert.IsAssignableFrom<DateTime>(result.TimeWithoutTimeZoneField);
-      Assert.IsAssignableFrom<DateTime>(result.TimetzField);
-      Assert.IsAssignableFrom<DateTime>(result.TimeWithTimeZoneField);
+      Assert.IsAssignableFrom<TimeSpan>(result.TimeField);
+      Assert.IsAssignableFrom<TimeSpan>(result.TimeWithoutTimeZoneField);
+      Assert.IsAssignableFrom<DateTimeOffset>(result.TimetzField);
+      Assert.IsAssignableFrom<DateTimeOffset>(result.TimeWithTimeZoneField);
       Assert.IsAssignableFrom<TimeSpan>(result.IntervalField);
       Assert.IsAssignableFrom<Boolean>(result.BooleanField);
       Assert.IsAssignableFrom<NpgsqlPoint>(result.PointField);
@@ -216,17 +225,17 @@ namespace Simple.Data.Npgsql.Test
       Assert.IsAssignableFrom<NpgsqlPath>(result.PathOpenField);
       Assert.IsAssignableFrom<NpgsqlPolygon>(result.PolygonField);
       Assert.IsAssignableFrom<NpgsqlCircle>(result.CircleField);
-      Assert.IsAssignableFrom<String>(result.CidrField);
-      Assert.IsAssignableFrom<System.Net.IPAddress>(result.InetField);
-      Assert.IsAssignableFrom<String>(result.MacaddrField);
+      Assert.IsAssignableFrom<NpgsqlInet>(result.CidrField);
+      Assert.IsAssignableFrom<IPAddress>(result.InetField);
+      Assert.IsAssignableFrom<PhysicalAddress>(result.MacaddrField);
       Assert.IsAssignableFrom<Boolean>(result.BitField); // bit(1) is a special case.  Actual CLR type is BitString, but converts in the Npgsql driver to Boolean.
       Assert.IsAssignableFrom<BitArray>(result.Bit10Field);
-      Assert.IsAssignableFrom<String>(result.BitVaryingUnlimitedField);
-      Assert.IsAssignableFrom<String>(result.BitVarying10Field);
-      Assert.IsAssignableFrom<String>(result.TsvectorField);
-      Assert.IsAssignableFrom<String>(result.TsqueryField);
+      Assert.IsAssignableFrom<BitArray>(result.BitVaryingUnlimitedField);
+      Assert.IsAssignableFrom<BitArray>(result.BitVarying10Field);
+      Assert.IsAssignableFrom<NpgsqlTsVector>(result.TsvectorField);
+      Assert.IsAssignableFrom<NpgsqlTsQueryAnd>(result.TsqueryField);
       Assert.IsAssignableFrom<Guid>(result.UuidField);
-      Assert.IsAssignableFrom<Int64>(result.OidField);
+      Assert.IsAssignableFrom<uint>(result.OidField);
     }
 
     [Test]
@@ -240,7 +249,7 @@ namespace Simple.Data.Npgsql.Test
       Assert.IsAssignableFrom<Int32[]>(result.IntegerArrayField);
       Assert.IsAssignableFrom<Single[]>(result.RealArrayField);
       Assert.IsAssignableFrom<Double[]>(result.DoublePrecisionArrayField);
-      //Assert.IsAssignableFrom<String[]>(result.VarcharArrayField); // TODO: Simple.data converts to a SimpleList.  Why?
+      Assert.IsAssignableFrom<SimpleList>(result.VarcharArrayField); // TODO: Simple.data converts to a SimpleList.  Why?
       Assert.IsAssignableFrom<Int32[,]>(result.IntegerMultiArrayField);
       Assert.IsAssignableFrom<Single[,]>(result.RealMultiArrayField);
       Assert.IsAssignableFrom<Double[,]>(result.DoublePrecisionMultiArrayField);

@@ -3,10 +3,10 @@
   <Connection>
     <ConnectionStringName>Test</ConnectionStringName>
   </Connection>
-  <Schema type="Resource">Simple.Data.PostgreSql.Test.Resources.Test.sql</Schema>
-  <Schema type="Resource">Simple.Data.PostgreSql.Test.Resources.BasicTypes.sql</Schema>
-  <Schema type="Resource">Simple.Data.PostgreSql.Test.Resources.ArrayTypes.sql</Schema>
-  <Schema type="Resource">Simple.Data.PostgreSql.Test.Resources.ProcedureTest.sql</Schema>
-  <Seed type="Resource">Simple.Data.PostgreSql.Test.Resources.DeleteData.sql</Seed>
-  <Seed type="Resource">Simple.Data.PostgreSql.Test.Resources.InsertData.sql</Seed>
+  <Schema type="Resource">Simple.Data.Npgsql.Test.Resources.Test.sql</Schema>
+  <Schema type="Resource">Simple.Data.Npgsql.Test.Resources.BasicTypes.sql</Schema>
+  <Schema type="Resource">Simple.Data.Npgsql.Test.Resources.ArrayTypes.sql</Schema>
+  <Schema type="Resource">Simple.Data.Npgsql.Test.Resources.ProcedureTest.sql</Schema>
+  <Seed type="Resource">Simple.Data.Npgsql.Test.Resources.DeleteData.sql</Seed>
+  <Seed type="Resource">Simple.Data.Npgsql.Test.Resources.InsertData.sql</Seed>
 </DbDescription>

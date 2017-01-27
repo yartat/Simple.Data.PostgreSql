@@ -12,13 +12,11 @@ namespace Simple.Data.Npgsql.Test
   /// Sets up and tears down for the test assembly.
   /// Leave this class outside of any namespace so that it applies to any namespace in the assembly
   /// </summary>
-  [SetUpFixture]
   public class GlobalTest
   {
     public static IDbManager Database { get; private set; }
 
-    [SetUp]
-    public void SetUp()
+    public static void SetUp()
     {
       try
       {
@@ -32,8 +30,7 @@ namespace Simple.Data.Npgsql.Test
       }
     }
 
-    [TearDown]
-    public void TearDown()
+    public static void TearDown()
     {
       try
       {

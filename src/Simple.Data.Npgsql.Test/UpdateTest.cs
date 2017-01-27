@@ -9,7 +9,14 @@ namespace Simple.Data.Npgsql.Test
     [SetUp]
     public void SetUp()
     {
+      GlobalTest.SetUp();
       GlobalTest.Database.Seed();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+      GlobalTest.TearDown();
     }
 
     [Test]

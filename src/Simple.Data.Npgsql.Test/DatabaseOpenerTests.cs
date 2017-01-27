@@ -6,12 +6,20 @@ using Simple.Data.Ado;
 
 namespace Simple.Data.Npgsql.Test
 {
-  public class DatabaseOpenerTest
+  [TestFixture]
+  public class DatabaseOpenerTests
   {
     [SetUp]
     public void SetUp()
     {
+      GlobalTest.SetUp();
       GlobalTest.Database.Seed();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+      GlobalTest.TearDown();
     }
 
     [Test]

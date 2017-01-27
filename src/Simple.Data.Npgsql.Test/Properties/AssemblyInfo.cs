@@ -2,3 +2,4 @@
 
 [assembly: AssemblyTitle("Simple.Data.Npgsql.Test")]
 [assembly: AssemblyDescription("")]
+
