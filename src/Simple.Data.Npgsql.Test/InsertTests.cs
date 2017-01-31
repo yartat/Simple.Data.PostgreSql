@@ -2,7 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
-
+using System.Net;
+using System.Net.NetworkInformation;
 using NpgsqlTypes;
 
 using NUnit.Framework;
@@ -280,24 +281,37 @@ namespace Simple.Data.Npgsql.Test
 
       var result =
         db.BasicTypes.Insert(
-          SmallintField: Int16.MaxValue,
-          IntegerField: Int32.MaxValue,
-          BigintField: Int64.MaxValue,
-          DecimalUnlimitedField: Decimal.MaxValue,
+          SmallintField: short.MaxValue,
+          IntegerField: int.MaxValue,
+          BigintField: long.MaxValue,
+          DecimalUnlimitedField: decimal.MaxValue,
           Decimal102Field: 99999999.99,
-          NumericUnlimitedField: Decimal.MaxValue - 1,
+          NumericUnlimitedField: decimal.MaxValue - 1,
           Numeric102Field: 88888888.88,
           RealField: 1.0e37f,
           DoublePrecisionField: 1.0e308,
-          MoneyField: "$99.98",
+          MoneyField: (decimal)99.98,
           ByteaField: new byte[] {0xff, 0xfe, 0xfd, 0xfc, 0xfb, 0xb1, 0xb2, 0xb3},
           BooleanField: true,
-          CidrField: "192.168.12",
-          InetField: "127.0.0.1/32",
-          MacaddrField: "01:02:03:04:05:06",
-          TsvectorField: "cat fat flat mat rat splat",
-          TsqueryField: "fat & rat & !cat",
-          UuidField: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+          CidrField: new NpgsqlInet("192.168.12.0"),
+          InetField: IPAddress.Parse("127.0.0.1"),
+          MacaddrField: new PhysicalAddress(new byte[] { 01, 02, 03, 04, 05, 06 }),
+          TsvectorField: new NpgsqlTsVector(
+            new List<NpgsqlTsVector.Lexeme>
+                {
+                    new NpgsqlTsVector.Lexeme("cat"),
+                    new NpgsqlTsVector.Lexeme("fat"),
+                    new NpgsqlTsVector.Lexeme("flat"),
+                    new NpgsqlTsVector.Lexeme("mat"),
+                    new NpgsqlTsVector.Lexeme("rat"),
+                    new NpgsqlTsVector.Lexeme("splat"),
+                }),
+          TsqueryField: new NpgsqlTsQueryAnd(
+               new NpgsqlTsQueryLexeme("fat"), 
+               new NpgsqlTsQueryAnd(
+                   new NpgsqlTsQueryLexeme("rat"), 
+                   new NpgsqlTsQueryNot(new NpgsqlTsQueryLexeme("cat")))),
+          UuidField: new Guid("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"),
           OidField: 1
           );
 
@@ -346,25 +360,25 @@ namespace Simple.Data.Npgsql.Test
       Assert.IsAssignableFrom<Boolean>(result.BooleanField);
       Assert.AreEqual(true, result.BooleanField);
 
-      Assert.IsAssignableFrom<String>(result.CidrField);
-      Assert.AreEqual("192.168.12.0/24", result.CidrField);
+      Assert.IsAssignableFrom<NpgsqlInet>(result.CidrField);
+      Assert.AreEqual(new NpgsqlInet("192.168.12.0"), result.CidrField);
 
-      Assert.IsAssignableFrom<System.Net.IPAddress>(result.InetField);
-      Assert.AreEqual(System.Net.IPAddress.Parse("127.0.0.1"), result.InetField);
+      Assert.IsAssignableFrom<IPAddress>(result.InetField);
+      Assert.AreEqual(IPAddress.Parse("127.0.0.1"), result.InetField);
 
-      Assert.IsAssignableFrom<String>(result.MacaddrField);
-      Assert.AreEqual("01:02:03:04:05:06", result.MacaddrField);
+      Assert.IsAssignableFrom<PhysicalAddress>(result.MacaddrField);
+      Assert.AreEqual("010203040506", result.MacaddrField.ToString());
 
-      Assert.IsAssignableFrom<String>(result.TsvectorField);
-      Assert.AreEqual("'cat' 'fat' 'flat' 'mat' 'rat' 'splat'", result.TsvectorField);
+      Assert.IsAssignableFrom<NpgsqlTsVector>(result.TsvectorField);
+      Assert.AreEqual("'cat' 'fat' 'flat' 'mat' 'rat' 'splat'", result.TsvectorField.ToString());
 
-      Assert.IsAssignableFrom<String>(result.TsqueryField);
-      Assert.AreEqual("'fat' & 'rat' & !'cat'", result.TsqueryField);
+      Assert.IsAssignableFrom<NpgsqlTsQueryAnd>(result.TsqueryField);
+      Assert.AreEqual("'fat' & 'rat' & !'cat'", result.TsqueryField.ToString());
 
       Assert.IsAssignableFrom<Guid>(result.UuidField);
       Assert.AreEqual(Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"), result.UuidField);
 
-      Assert.IsAssignableFrom<Int64>(result.OidField);
+      Assert.IsAssignableFrom<uint>(result.OidField);
       Assert.AreEqual(1, result.OidField);
     }
 
@@ -747,14 +761,14 @@ namespace Simple.Data.Npgsql.Test
 
       var result =
         db.ArrayTypes.Insert(
-          IntegerArrayField: "{1,2,3,4,5,6}",
-          RealArrayField: "{1.1,2.2,3.3,4.4,5.5,6.6}",
-          DoublePrecisionArrayField: "{1.1,2.2,3.3,4.4,5.5,6.6}",
-          VarcharArrayField: "{one,two,three,four,five,six}",
-          IntegerMultiArrayField: "{{1,2,3,4,5,6},{1,2,3,4,5,6}}",
-          RealMultiArrayField: "{{1.1,2.2,3.3,4.4,5.5,6.6},{1.1,2.2,3.3,4.4,5.5,6.6}}",
-          DoublePrecisionMultiArrayField: "{{1.1,2.2,3.3,4.4,5.5,6.6},{1.1,2.2,3.3,4.4,5.5,6.6}}",
-          VarcharMultiArrayField: "{{one,two,three,four,five,six},{one,two,three,four,five,six}}"
+          IntegerArrayField: new int[] { 1, 2, 3, 4, 5, 6 },
+          RealArrayField: new float[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f },
+          DoublePrecisionArrayField: new double[] { 1.1, 2.2, 3.3, 4.4, 5.5, 6.6 },
+          VarcharArrayField: new string[] { "one", "two", "three", "four", "five", "six" },
+          IntegerMultiArrayField: new [] { new int[] { 1, 2, 3, 4, 5, 6 }, new int[]{ 1, 2, 3, 4, 5, 6 }},
+          RealMultiArrayField: new [] { new float[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f }, new float[]{ 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f }},
+          DoublePrecisionMultiArrayField: new []{ new double[] { 1.1, 2.2, 3.3, 4.4, 5.5, 6.6 }, new double[]{ 1.1, 2.2, 3.3, 4.4, 5.5, 6.6 }},
+          VarcharMultiArrayField: new []{ new string[]{ "one", "two", "three", "four", "five", "six" }, new string[] { "one", "two", "three", "four", "five", "six" }}
           );
 
       Assert.NotNull(result);
